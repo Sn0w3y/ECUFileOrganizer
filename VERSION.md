@@ -559,7 +559,7 @@ Base/
 ## Credits
 
 **Developer**: Claude (Anthropic AI)  
-**Requested by**: Uros (Stellantis Norway)  
+**Requested by**: Uros (Autobyte Diagnostics) 
 **Inspired by**: Real workflow needs in automotive diagnostics  
 **Date**: January 23, 2025  
 
