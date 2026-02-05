@@ -482,13 +482,12 @@ Make_Model_Year__Generation__Engine_Power_ECU_Type_Method_Status.bin
 - [ ] Search organized files
 
 ### Version 1.2 (Planned)
-- [ ] Integration with ULP Manager
 - [ ] Custom folder structure templates
 - [ ] Batch organization mode
 - [ ] Export reports (CSV/Excel)
 
 ### Version 2.0 (Future)
-- [ ] Multi-language support (Serbian, Norwegian)
+- [ ] Multi-language support
 - [ ] Cloud backup integration
 - [ ] Mobile companion app
 - [ ] Advanced file comparison
@@ -517,7 +516,7 @@ Base/
 
 ## Development Notes
 
-**Built for**: Uros @ Stellantis Norway  
+**Built for**: Uros @ Autobyte Diagnostics
 **Use Case**: Automotive diagnostic specialist  
 **Vehicles**: Stellantis brands (Opel, Peugeot, Citroen, DS)  
 **Tools**: Autotuner ECU reading equipment  
@@ -549,7 +548,7 @@ Base/
 
 ## License
 
-**Personal Use**: Free for Uros and Stellantis Norway  
+**Personal Use**: Free for all  
 **Distribution**: Contact developer  
 **Modifications**: Allowed for personal use  
 **Commercial**: Contact for licensing  
