@@ -35,3 +35,12 @@ ENGINE_PATTERN = rb'([RVLI]\d\s+[\d.,]+[lL]\s+\w{2,6})\s+([A-Z]{3,4})'
 
 # Bosch SW number + variant string (e.g. "1037394113P529TAYI")
 BOSCH_SW_VARIANT_PATTERN = rb'(10[3-9]\d{7})([A-Z]\d{3}[A-Z0-9]{2,6})'
+
+# Ford/Continental part number (e.g. "RK3A-12A650-AB")
+FORD_PART_NUMBER_PATTERN = rb'(?<![A-Z0-9])([A-Z0-9]{4}-[A-Z0-9]{5,6}-[A-Z]{2})(?![A-Z0-9])'
+
+# Ford calibration ID with prefix (e.g. "PXRK3A-12A650-AA")
+FORD_CALIBRATION_PATTERN = rb'(?:Ford Motor Co\.\s*\d{4})([A-Z]{2}[A-Z0-9]{4}-[A-Z0-9]{5,6}-[A-Z]{2})'
+
+# Continental ECU type identifiers (e.g. SID213, SID807, EMS3125)
+CONTINENTAL_ECU_PATTERN = rb'(?:SID|EMS|SIM)\d{3,4}'
