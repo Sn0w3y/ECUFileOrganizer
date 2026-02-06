@@ -1,23 +1,70 @@
-name: Build Windows EXE
+name: Build & Release EXE
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  build-and-release:
     runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Read current version
+        id: version
+        shell: python
+        run: |
+          import re, os
+          with open("ecu_file_organizer/constants.py") as f:
+              content = f.read()
+          match = re.search(r'APP_VERSION\s*=\s*"([\d.]+)"', content)
+          version = match.group(1)
+          print(f"Current version: {version}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"current={version}\n")
+
+      - name: Bump version
+        id: bump
+        shell: python
+        run: |
+          import re, os
+          with open("ecu_file_organizer/constants.py") as f:
+              content = f.read()
+          match = re.search(r'APP_VERSION\s*=\s*"([\d.]+)"', content)
+          old = match.group(1)
+          parts = old.split(".")
+          parts[-1] = str(int(parts[-1]) + 1)
+          new = ".".join(parts)
+          content = content.replace(f'APP_VERSION = "{old}"', f'APP_VERSION = "{new}"')
+          with open("ecu_file_organizer/constants.py", "w") as f:
+              f.write(content)
+          print(f"Version bumped: {old} -> {new}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"new={new}\n")
+              f.write(f"tag=v{new}\n")
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ecu_file_organizer/constants.py
+          git commit -m "Bump version to ${{ steps.bump.outputs.new }}"
+          git tag ${{ steps.bump.outputs.tag }}
+          git push origin main --tags
 
       - name: Install dependencies
         run: |
@@ -27,17 +74,26 @@ jobs:
 
       - name: Build EXE
         run: |
-          pyinstaller --onefile --windowed --name "ECU_File_Organizer" --add-data "ecu_file_organizer;ecu_file_organizer" ecu_file_organizer.py
+          pyinstaller --onefile --windowed --name "ECU_File_Organizer_v${{ steps.bump.outputs.new }}" --add-data "ecu_file_organizer;ecu_file_organizer" ecu_file_organizer.py
 
-      - name: Upload EXE artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ECU_File_Organizer_Windows
-          path: dist/ECU_File_Organizer.exe
+          name: ECU_File_Organizer_v${{ steps.bump.outputs.new }}
+          path: dist/*.exe
 
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/ECU_File_Organizer.exe
+          tag_name: ${{ steps.bump.outputs.tag }}
+          name: ECU File Organizer ${{ steps.bump.outputs.tag }}
+          body: |
+            ## ECU File Organizer v${{ steps.bump.outputs.new }}
+
+            ### Download
+            `ECU_File_Organizer_v${{ steps.bump.outputs.new }}.exe` herunterladen und starten.
+
+            ### Changes
+            Automatisch erstellt aus dem neuesten Stand von `main`.
+          files: dist/*.exe
           generate_release_notes: true
