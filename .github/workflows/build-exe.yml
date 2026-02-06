@@ -62,11 +62,11 @@ jobs:
         with:
           nuitka-version: main
           script-name: ecu_file_organizer.py
-          mode: standalone
-          onefile: true
-          windows-console-mode: disable
+          mode: app
+          disable-console: true
           windows-icon-from-ico: app_icon.ico
           enable-plugins: pyqt6
+          assume-yes-for-downloads: true
           nofollow-import-to: |
             PyQt6.QtWebEngine
             PyQt6.QtWebEngineCore
