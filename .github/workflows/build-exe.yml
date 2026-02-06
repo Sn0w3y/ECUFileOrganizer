@@ -57,50 +57,16 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
+          pip install nuitka ordered-set zstandard
 
-      - name: Install UPX
+      - name: Build EXE with Nuitka
         run: |
-          choco install upx -y
-
-      - name: Build EXE (optimized)
-        shell: python
-        run: |
-          import subprocess, sys
-          excludes = [
-              "QtWebEngine", "QtWebEngineCore", "QtWebEngineWidgets",
-              "QtWebChannel", "QtWebSockets",
-              "Qt3DCore", "Qt3DRender", "Qt3DInput", "Qt3DLogic", "Qt3DAnimation",
-              "QtMultimedia", "QtMultimediaWidgets",
-              "QtBluetooth", "QtNfc", "QtSensors", "QtSerialPort",
-              "QtPositioning", "QtLocation",
-              "QtQuick", "QtQuickWidgets", "QtQml",
-              "QtDesigner", "QtHelp", "QtTest",
-              "QtNetwork", "QtNetworkAuth",
-              "QtOpenGL", "QtOpenGLWidgets",
-              "QtPdf", "QtPdfWidgets",
-              "QtSvg", "QtSvgWidgets",
-              "QtXml", "QtSql",
-              "QtDBus", "QtRemoteObjects",
-              "QtTextToSpeech", "QtSpatialAudio",
-              "tkinter", "unittest", "pydoc", "doctest",
-              "lib2to3", "xmlrpc", "multiprocessing",
-          ]
-          cmd = [
-              sys.executable, "-m", "PyInstaller",
-              "--onefile", "--windowed",
-              "--name", "ECU_File_Organizer",
-          ]
-          for ex in excludes:
-              cmd += ["--exclude-module", ex]
-          cmd.append("ecu_file_organizer.py")
-          print("Running:", " ".join(cmd[:10]), "...")
-          result = subprocess.run(cmd)
-          sys.exit(result.returncode)
+          python -m nuitka --standalone --onefile --windows-console-mode=disable --enable-plugin=pyqt6 --nofollow-import-to=PyQt6.QtWebEngine,PyQt6.QtWebEngineCore,PyQt6.QtWebEngineWidgets,PyQt6.QtWebChannel,PyQt6.QtWebSockets,PyQt6.Qt3DCore,PyQt6.Qt3DRender,PyQt6.Qt3DInput,PyQt6.QtMultimedia,PyQt6.QtMultimediaWidgets,PyQt6.QtBluetooth,PyQt6.QtNfc,PyQt6.QtSensors,PyQt6.QtQuick,PyQt6.QtQuickWidgets,PyQt6.QtQml,PyQt6.QtDesigner,PyQt6.QtHelp,PyQt6.QtTest,PyQt6.QtNetwork,PyQt6.QtNetworkAuth,PyQt6.QtOpenGL,PyQt6.QtOpenGLWidgets,PyQt6.QtPdf,PyQt6.QtSvg,PyQt6.QtSvgWidgets,PyQt6.QtXml,PyQt6.QtSql,PyQt6.QtDBus,PyQt6.QtRemoteObjects,PyQt6.QtSerialPort,PyQt6.QtPositioning,PyQt6.QtLocation,PyQt6.QtTextToSpeech,PyQt6.QtSpatialAudio,tkinter,unittest,pydoc,lib2to3,xmlrpc,multiprocessing --output-filename=ECU_File_Organizer.exe ecu_file_organizer.py
 
       - name: Rename EXE with version
         run: |
-          move dist\ECU_File_Organizer.exe "dist\ECU_File_Organizer_v${{ steps.bump.outputs.new }}.exe"
+          move ECU_File_Organizer.exe "dist\ECU_File_Organizer_v${{ steps.bump.outputs.new }}.exe"
+        shell: cmd
 
       - name: Show EXE size
         run: |
