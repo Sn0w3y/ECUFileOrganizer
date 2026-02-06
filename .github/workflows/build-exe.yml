@@ -24,19 +24,6 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Read current version
-        id: version
-        shell: python
-        run: |
-          import re, os
-          with open("ecu_file_organizer/constants.py") as f:
-              content = f.read()
-          match = re.search(r'APP_VERSION\s*=\s*"([\d.]+)"', content)
-          version = match.group(1)
-          print(f"Current version: {version}")
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-              f.write(f"current={version}\n")
-
       - name: Bump version
         id: bump
         shell: python
@@ -72,9 +59,21 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build EXE
+      - name: Install UPX
         run: |
-          pyinstaller --onefile --windowed --name "ECU_File_Organizer_v${{ steps.bump.outputs.new }}" --add-data "ecu_file_organizer;ecu_file_organizer" ecu_file_organizer.py
+          choco install upx -y
+
+      - name: Build EXE (optimized)
+        run: |
+          pyinstaller ECU_File_Organizer.spec
+
+      - name: Rename EXE with version
+        run: |
+          move dist\ECU_File_Organizer.exe "dist\ECU_File_Organizer_v${{ steps.bump.outputs.new }}.exe"
+
+      - name: Show EXE size
+        run: |
+          dir dist\*.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -91,9 +90,12 @@ jobs:
             ## ECU File Organizer v${{ steps.bump.outputs.new }}
 
             ### Download
-            `ECU_File_Organizer_v${{ steps.bump.outputs.new }}.exe` herunterladen und starten.
+            `ECU_File_Organizer_v${{ steps.bump.outputs.new }}.exe` herunterladen und starten - keine Installation nötig.
 
-            ### Changes
-            Automatisch erstellt aus dem neuesten Stand von `main`.
+            ### Features
+            - Automatische BIN-Datei Erkennung (Bosch, Continental)
+            - SW-Version, OEM-Nummern, ECU-Typ aus BIN auslesen
+            - Professionelle Ordnerstruktur
+            - Log.txt mit allen Metadaten
           files: dist/*.exe
           generate_release_notes: true
